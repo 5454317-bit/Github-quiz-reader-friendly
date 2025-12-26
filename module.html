@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GitHub Basics Audio Quiz</title>
+    <style>
+        :root {
+            --primary: #2da44e; /* GitHub Green */
+            --primary-hover: #2c974b;
+            --dark: #0d1117;    /* GitHub Dark Bg */
+            --card: #161b22;    /* GitHub Card Bg */
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --btn-bg: #21262d;
+            --btn-border: rgba(240, 246, 252, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+
+        .container {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px 24px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-box {
+            display: inline-block;
+            background-color: rgba(56, 139, 253, 0.1);
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-area {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 120px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .current-action {
+            font-size: 1em;
+            color: #8b949e;
+            font-style: italic;
+            margin-bottom: 30px;
+            height: 24px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text);
+            padding: 18px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        button.primary {
+            background-color: var(--primary);
+            color: white;
+            border-color: rgba(240, 246, 252, 0.1);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            flex: 1.2;
+            font-size: 1.2em;
+        }
+
+        button.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #start-overlay h2 {
+            margin-bottom: 30px;
+            color: white;
+            font-size: 1.8em;
+        }
+
+        #start-overlay button {
+            max-width: 300px;
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-top: 32px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 8px rgba(45, 164, 78, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+            .container {
+                padding: 24px 16px;
+                min-height: 60vh;
+            }
+            .question-text {
+                font-size: 1.1em;
+            }
+            .controls {
+                gap: 8px;
+            }
+            button {
+                padding: 16px 8px;
+                font-size: 1em;
+            }
+            button.primary {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay for Browser Autoplay Policies -->
+    <div id="start-overlay">
+        <h2>Ready to Quiz?</h2>
+        <button class="primary" onclick="startQuizManual()">Tap to Start</button>
+    </div>
+
+    <div class="container">
+        <!-- The Small Box -->
+        <div class="status-box">
+            Question <span id="q-num">1</span> / <span id="q-total">85</span>
+        </div>
+
+        <!-- Visual Display of what's happening -->
+        <div class="question-area">
+            <div class="question-text" id="display-text">
+                Waiting to start...
+            </div>
+            <div class="current-action" id="status-text">
+                Press Start to begin
+            </div>
+        </div>
+
+        <!-- Three Buttons -->
+        <div class="controls">
+            <button onclick="prevQuestion()">Previous</button>
+            <button id="play-pause-btn" class="primary" onclick="togglePlay()">Pause</button>
+            <button onclick="nextQuestion(true)">Next</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const quizData = [
+            // Block 1
+            {
+                q: "Which of the following scenarios is a common use case for a version control system?",
+                options: ["A) Deleting earlier versions of a project to save space.", "B) Making experimental changes to your project in an isolated branch.", "C) Gathering feature requirements for a large project."],
+                answer: "B",
+                explanation: "Version control systems let you create branches to experiment safely without affecting the main codebase."
+            },
+            {
+                q: "What is another name for a version control system?",
+                options: ["A) Version management software (VMS)", "B) Software control management (SCM) system", "C) Software configuration management (SCM) system"],
+                answer: "C",
+                explanation: "Software Configuration Management (SCM) is a standard name for systems that manage versions/configuration of software."
+            },
+            {
+                q: "What’s the difference between Git and GitHub?",
+                options: ["A) Git is local; GitHub is a remote hosting service.", "B) Git runs in the cloud; GitHub is an interface layer.", "C) Git is for individuals; GitHub is for groups."],
+                answer: "A",
+                explanation: "Git is the DVCS tool you run locally; GitHub is a hosting service (remote) that works with Git."
+            },
+            {
+                q: "What Git command gives information about how to use Git?",
+                options: ["A) git init", "B) git status", "C) git help"],
+                answer: "C",
+                explanation: "git help (or git --help) shows usage and command documentation."
+            },
+            // Block 2
+            {
+                q: "Which feature is best for tracking feedback, tasks, and bugs on GitHub?",
+                options: ["A) GitHub Discussions", "B) GitHub Pages", "C) GitHub Issues"],
+                answer: "GitHub Issues",
+                explanation: "Issues are designed to record bugs, tasks, and feedback with metadata, labels, and assignment."
+            },
+            {
+                q: "What role does a pull request play in the GitHub flow?",
+                options: ["A) It records changes to files.", "B) It creates a new branch.", "C) It proposes merging changes from one branch into another."],
+                answer: "It proposes merging changes",
+                explanation: "PRs are review-and-merge requests to bring branch changes into another branch."
+            },
+            {
+                q: "What is the purpose of GitHub Discussions?",
+                options: ["A) Host documentation.", "B) Track tasks and bugs.", "C) Facilitate open-ended conversations and community engagement."],
+                answer: "Facilitate conversations",
+                explanation: "Discussions are for community Q&A, brainstorming, and broader conversations separate from issues."
+            },
+            {
+                q: "What is the primary benefit of using branches?",
+                options: ["A) Automatically merge changes.", "B) Restrict access to files.", "C) Allow changes to be made without affecting the main branch."],
+                answer: "Allow changes without affecting main",
+                explanation: "Branches isolate work so the main branch remains stable."
+            },
+            {
+                q: "What is the key difference between a commit and a pull request?",
+                options: ["A) Commit merges; PR separates.", "B) A commit records changes; a pull request proposes merging changes.", "C) Commit proposes; PR records."],
+                answer: "Commit records; PR proposes merge",
+                explanation: "Commits are local snapshots of files; PRs are requests to merge those snapshots."
+            },
+            {
+                q: "What is the purpose of a GitHub repository?",
+                options: ["A) Virtual machine for testing.", "B) Service to host web apps.", "C) Store and manage project files and their revision history."],
+                answer: "Store and manage files",
+                explanation: "A repository holds code, assets, and full history via Git."
+            },
+            {
+                q: "Which feature should you use to share a new idea not related to current tasks?",
+                options: ["A) GitHub Issues", "B) GitHub Discussions", "C) GitHub Pull Requests"],
+                answer: "GitHub Discussions",
+                explanation: "Use Discussions for big-picture ideas and open-ended proposals."
+            },
+            {
+                q: "What is a common cause of error when trying to push changes?",
+                options: ["A) The repository is public.", "B) The repository has too many branches.", "C) You do not have write access to the repository."],
+                answer: "Lack of write access",
+                explanation: "Pushing requires appropriate permissions (Write access) on the remote repository."
+            },
+            {
+                q: "What should you do after completing work on a feature branch?",
+                options: ["A) Submit a pull request", "B) Delete the branch immediately", "C) Make additional commits"],
+                answer: "Submit a pull request",
+                explanation: "A PR enables review and merging of your work into the main branch."
+            },
+            // Block 3
+            {
+                q: "What is the difference between organization and personal accounts?",
+                options: ["A) Organizational accounts are shared; personal accounts are for individuals.", "B) Organization accounts cost more.", "C) They are exactly the same."],
+                answer: "Org accounts are shared",
+                explanation: "Organizations group repos, teams, and centralized permissions, while personal accounts are for single users."
+            },
+            {
+                q: "What is a best reason to upgrade to GitHub Enterprise?",
+                options: ["A) To use Actions.", "B) To use Codespaces.", "C) To centrally manage users and repositories across multiple organizations."],
+                answer: "Centrally manage users",
+                explanation: "Enterprise adds org-wide controls, SSO, and centralized admin features."
+            },
+            {
+                q: "What is the purpose of a team in GitHub?",
+                options: ["A) Manage an organization account.", "B) Allow single user multiple logins.", "C) Reflect group structure and provide cascading permissions."],
+                answer: "Reflect group structure",
+                explanation: "Teams simplify permissions and communications by grouping users."
+            },
+            {
+                q: "Which function can you execute on GitHub Mobile?",
+                options: ["A) Check out branches with PRs and view CI statuses.", "B) Compare changed images.", "C) Add and clone repositories."],
+                answer: "Check out PR branches and view CI",
+                explanation: "The mobile app supports PR review, CI visibility, and triage."
+            },
+            {
+                q: "Which feature is unique to GitHub Enterprise Cloud (GHEC)?",
+                options: ["A) Requires on-premises deployment.", "B) Provides centralized user management with identity provider integration.", "C) Operates in a private cloud."],
+                answer: "Centralized user management",
+                explanation: "Enterprise Cloud supports identity provider (IdP) integrations (SAML/SSO) and centralized controls."
+            },
+            {
+                q: "How can you manage GitHub Actions at the enterprise level?",
+                options: ["A) Create workflow templates.", "B) Configure a GitHub Actions use policy.", "C) Manually sync public actions."],
+                answer: "Configure a use policy",
+                explanation: "Enterprises can set policies to control how and where Actions are used."
+            },
+            {
+                q: "What can you do when configuring self-hosted runners for enterprise use?",
+                options: ["A) Create and add custom labels to your runners.", "B) Add proxy configs after start.", "C) Add IP range at repo level."],
+                answer: "Create and add custom labels",
+                explanation: "Labels help route jobs to the appropriate specific self-hosted runners."
+            },
+            {
+                q: "What are encrypted secrets?",
+                options: ["A) Auth tokens in account settings.", "B) SSH keys.", "C) Encrypted environment variables to store sensitive information."],
+                answer: "Encrypted environment variables",
+                explanation: "Secrets store sensitive values like API keys and tokens securely for workflows."
+            },
+            // Block 4
+            {
+                q: "When code scanning is enabled, what is one default event that triggers a scan?",
+                options: ["A) Creating a new branch.", "B) Pushing a change.", "C) Deleting a branch."],
+                answer: "Pushing a change",
+                explanation: "Scans commonly run on pushes to detect issues in new code immediately."
+            },
+            {
+                q: "Which tools are used to upload a SARIF file?",
+                options: ["A) GitHub Actions, the code scanning API, and the CodeQL CLI.", "B) ESLint and Prettier.", "C) Manual upload only."],
+                answer: "Actions, API, and CodeQL CLI",
+                explanation: "These are the standard methods to submit SARIF (Static Analysis Results) to GitHub."
+            },
+            {
+                q: "What is the difference between scheduled and triggered events in code scanning?",
+                options: ["A) Scheduled events run on a schedule; triggered events run on code events (like push).", "B) They are the same.", "C) Triggered events are manual only."],
+                answer: "Scheduled vs Triggered",
+                explanation: "One runs based on time (cron), the other reacts to repository activity."
+            },
+            // Block 5
+            {
+                q: "What is GitHub Copilot?",
+                options: ["A) A database manager.", "B) An AI pair programmer that provides code suggestions.", "C) A CI/CD tool."],
+                answer: "AI pair programmer",
+                explanation: "Copilot uses AI to offer code completions and suggestions in your editor."
+            },
+            {
+                q: "Which IDE extensions are supported for GitHub Copilot?",
+                options: ["A) VS Code only.", "B) VS Code and Visual Studio.", "C) GitHub.com, VS Code, Visual Studio, Neovim, and JetBrains."],
+                answer: "Multiple IDEs supported",
+                explanation: "Copilot integrates across the web and multiple popular IDEs including VS Code, Neovim, and JetBrains."
+            },
+            {
+                q: "What is the difference between Copilot Business and Enterprise?",
+                options: ["A) Enterprise has extra security, IP indemnity, and privacy features.", "B) Business is free.", "C) Enterprise allows unlimited users."],
+                answer: "Enterprise adds security and indemnity",
+                explanation: "Enterprise includes stronger security compliance, IP indemnity, and legal protections."
+            },
+            {
+                q: "Which plan includes all Pro features plus extra premium usage and priority infra?",
+                options: ["A) GitHub Copilot Free.", "B) GitHub Copilot Business.", "C) GitHub Copilot Pro+."],
+                answer: "GitHub Copilot Pro+",
+                explanation: "Pro+ denotes premium resources and priority infrastructure access."
+            },
+            // Block 6
+            {
+                q: "Which directory is the clone placed in after creating a Codespace?",
+                options: ["A) /root", "B) /workspaces directory", "C) /home/user"],
+                answer: "/workspaces directory",
+                explanation: "Codespaces mounts the repository inside the /workspaces directory in the container."
+            },
+            {
+                q: "What is the maximum number of Codespaces per repository/branch?",
+                options: ["A) One.", "B) Five.", "C) Unlimited (depending on available resources)."],
+                answer: "Unlimited subject to resources",
+                explanation: "You can create as many as your quota and resources allow."
+            },
+            {
+                q: "What happens when a Codespace loses internet connectivity?",
+                options: ["A) It switches to local mode.", "B) You aren't able to access your Codespace.", "C) It deletes itself."],
+                answer: "You cannot access it",
+                explanation: "Codespaces are cloud-hosted; a network connection is required to access them."
+            },
+            {
+                q: "What defines the beginning of a Codespace's lifecycle?",
+                options: ["A) When you install VS Code.", "B) When you push code.", "C) When you create a Codespace (ends when deleted)."],
+                answer: "Creation to Deletion",
+                explanation: "The lifecycle tracks from the moment of creation until explicit deletion."
+            },
+            // Block 7
+            {
+                q: "Which Project descriptor automatically saves when you change it?",
+                options: ["A) Project title.", "B) Project description.", "C) Custom fields."],
+                answer: "Project description",
+                explanation: "The project description field is typically autosaved as you edit it."
+            },
+            {
+                q: "What does an iteration field help you do in Projects?",
+                options: ["A) Create sequential phases and group issues.", "B) Repeat tasks.", "C) Automate emails."],
+                answer: "Create sequential phases",
+                explanation: "Iterations are used to track sprints or phases in a project timeline."
+            },
+            {
+                q: "Which field type makes a Priority grouping like High/Medium/Low?",
+                options: ["A) Text.", "B) Number.", "C) Single select."],
+                answer: "Single select",
+                explanation: "Single-select fields allow you to create predefined options like Priority."
+            },
+            {
+                q: "What is the easiest way to add automation to your Project?",
+                options: ["A) Write a script.", "B) Use Built-in Automation.", "C) Use GitHub Actions."],
+                answer: "Built-in Automation",
+                explanation: "Projects include out-of-the-box automation workflows for common tasks."
+            },
+            {
+                q: "Where can you change visibility, close, or delete your Project?",
+                options: ["A) In the main view.", "B) Visibility and Access settings.", "C) Profile settings."],
+                answer: "Visibility and Access",
+                explanation: "The project settings menu contains the visibility and danger zone controls."
+            },
+            {
+                q: "What is the benefit of converting checklist items into sub-issues?",
+                options: ["A) It deletes them.", "B) It turns them into standalone issues with status/metadata.", "C) It hides them."],
+                answer: "Converts to standalone issues",
+                explanation: "Sub-issues gain their own lifecycle, metadata, and tracking capabilities."
+            },
+            {
+                q: "Where do you enable default workflows for a Project?",
+                options: ["A) From the three-dot menu in the project.", "B) In repo settings.", "C) In organization settings."],
+                answer: "Three-dot menu",
+                explanation: "Project-level controls and templates are accessed via the project menu."
+            },
+            // Block 8
+            {
+                q: "Which Markdown snippet produces text in bold italics?",
+                options: ["A) *Text*", "B) **Text**", "C) ***Text***"],
+                answer: "***Text***",
+                explanation: "Three asterisks apply both bold and italic formatting."
+            },
+            {
+                q: "How do you print characters like * and _ literally in Markdown?",
+                options: ["A) Use quotes.", "B) Escape them with a backslash (\\).", "C) Double them."],
+                answer: "Escape with backslash",
+                explanation: "A backslash tells the Markdown parser to treat the following character as text."
+            },
+            {
+                q: "If Markdown doesn’t render an HTML snippet you want on GitHub Pages, what should you do?",
+                options: ["A) Just add the HTML inline.", "B) Use a plugin.", "C) Give up."],
+                answer: "Add HTML inline",
+                explanation: "GitHub Pages Markdown usually supports inline HTML for advanced formatting."
+            },
+            // Block 9
+            {
+                q: "Where is the best place to find how you can help a project?",
+                options: ["A) The issues tab.", "B) The README file.", "C) The source code."],
+                answer: "The README file",
+                explanation: "READMEs typically contain the project overview and contribution guidelines."
+            },
+            {
+                q: "What is the preferred way to ask for help or reviews on a pull request?",
+                options: ["A) Email the owner.", "B) Add a comment in the pull request.", "C) Open a new issue."],
+                answer: "Add comment in PR",
+                explanation: "PR comments are context-aware and notify relevant reviewers."
+            },
+            {
+                q: "What is needed before you can create a pull request on GitHub?",
+                options: ["A) Just clone the repo.", "B) Fork, clone, commit, and push to your fork.", "C) Get admin access."],
+                answer: "Fork, clone, commit, push",
+                explanation: "You must have your changes pushed to a repository (usually your fork) to open a PR."
+            },
+            // Block 10
+            {
+                q: "What is the relationship between open source and InnerSource?",
+                options: ["A) They are opposites.", "B) InnerSource is open source restricted to an organization.", "C) InnerSource is for public code."],
+                answer: "InnerSource is internal open source",
+                explanation: "InnerSource applies open-source best practices within the boundaries of an organization."
+            },
+            {
+                q: "What is the best way to address low-quality bug reports?",
+                options: ["A) Ignore them.", "B) Add an ISSUE_TEMPLATE.md.", "C) Ban the user."],
+                answer: "Add an ISSUE_TEMPLATE",
+                explanation: "Templates guide users to provide reproduction steps and necessary details."
+            },
+            {
+                q: "Which metric indicates the InnerSource program is a success?",
+                options: ["A) Fewer downloads.", "B) A dramatic rise in pull requests addressing bugs.", "C) More private repos."],
+                answer: "Rise in PRs fixing bugs",
+                explanation: "Active contributions from inside the org indicate successful adoption."
+            },
+            // Block 11
+            {
+                q: "What is the best way to ensure secure versions of dependencies?",
+                options: ["A) Check manually.", "B) Enable Dependabot.", "C) Never update."],
+                answer: "Enable Dependabot",
+                explanation: "Dependabot automatically scans for vulnerabilities and opens PRs to fix them."
+            },
+            {
+                q: "Which file helps ensure .secrets folder isn’t committed?",
+                options: ["A) README.md", "B) .gitignore", "C) config.yml"],
+                answer: ".gitignore",
+                explanation: ".gitignore tells Git which files or folders to exclude from version control."
+            },
+            {
+                q: "What does secret scanning do?",
+                options: ["A) Encrypts your drive.", "B) Looks for known secrets/credentials committed in the repo.", "C) Hides your code."],
+                answer: "Detects secrets in repo",
+                explanation: "It alerts you if you accidentally commit API keys or tokens so you can revoke them."
+            },
+            // Block 12
+            {
+                q: "Which permission allows adding/removing org members to a team?",
+                options: ["A) Member.", "B) Team maintainer.", "C) Contributor."],
+                answer: "Team maintainer",
+                explanation: "Team maintainers manage membership and settings for their specific team."
+            },
+            {
+                q: "Which technology enables access without a second sign-in on corp network?",
+                options: ["A) SSH.", "B) Single sign-on (SSO).", "C) HTTPS."],
+                answer: "Single sign-on",
+                explanation: "SSO delegates authentication to a central identity provider."
+            },
+            {
+                q: "What is the appropriate repo permission for contributors who need to push?",
+                options: ["A) Read.", "B) Write.", "C) Admin."],
+                answer: "Write",
+                explanation: "Write permission allows pushing branches and creating PRs."
+            },
+            {
+                q: "Which permission level is best for project managers who need to triage issues without code access?",
+                options: ["A) Read.", "B) Triage.", "C) Write."],
+                answer: "Triage",
+                explanation: "Triage allows managing issues and PRs (labels, assignment) without write access to code."
+            },
+            {
+                q: "What is a benefit of Active Directory integration for teams?",
+                options: ["A) Faster internet.", "B) Centralized Identity Management.", "C) Free licenses."],
+                answer: "Centralized Identity Management",
+                explanation: "It syncs user provisioning and group membership from a central directory."
+            },
+            {
+                q: "What action is exclusive to Organization Owners?",
+                options: ["A) Creating repos.", "B) Manage organization settings, security, and billing.", "C) Creating teams."],
+                answer: "Manage settings and billing",
+                explanation: "Owners have full administrative control over the entire organization."
+            },
+            {
+                q: "What is the key difference between an org member and an outside collaborator?",
+                options: ["A) Members are in the internal directory; collaborators are external.", "B) Collaborators pay more.", "C) Members have less access."],
+                answer: "Members are internal; collaborators external",
+                explanation: "Outside collaborators are given access to specific repos but aren't part of the org structure."
+            },
+            {
+                q: "Which permission allows managing repo settings but not deleting the repo?",
+                options: ["A) Admin.", "B) Maintain.", "C) Write."],
+                answer: "Maintain",
+                explanation: "Maintain offers admin-like features for settings without destructive capabilities."
+            },
+            // Block 13
+            {
+                q: "What type of auth verifies a user against a known identity provider?",
+                options: ["A) Basic Auth.", "B) SAML Single Sign-on (SAML SSO).", "C) OAuth."],
+                answer: "SAML SSO",
+                explanation: "SAML SSO validates credentials against an external IdP."
+            },
+            {
+                q: "Where does a user authenticate after enabling SAML SSO?",
+                options: ["A) On GitHub.", "B) With the Identity Provider (IdP).", "C) Via email."],
+                answer: "With the IdP",
+                explanation: "GitHub redirects the user to the IdP for login."
+            },
+            {
+                q: "Which 2FA method supports secure backup of codes in the cloud?",
+                options: ["A) SMS.", "B) Time-based One-time Password (TOTP).", "C) Security Keys."],
+                answer: "TOTP",
+                explanation: "Authenticator apps (TOTP) often provide encrypted cloud backup for recovery."
+            },
+            // Block 14
+            {
+                q: "What is the role of a pull request when branches differ?",
+                options: ["A) Delete the branch.", "B) Propose changes from a compare branch to a base branch.", "C) Archive the repo."],
+                answer: "Propose changes compare to base",
+                explanation: "It requests that changes from the source (compare) be merged into the target (base)."
+            },
+            {
+                q: "Which PR status indicates changes cannot be merged until further actions?",
+                options: ["A) Open.", "B) Draft pull request.", "C) Closed."],
+                answer: "Draft pull request",
+                explanation: "Drafts are works-in-progress and cannot be merged until marked ready."
+            },
+            {
+                q: "Why work on a separate branch instead of main?",
+                options: ["A) It's faster.", "B) To test new features without impacting stable code.", "C) Main is read-only."],
+                answer: "Test features without impacting stable code",
+                explanation: "Isolation prevents bugs from breaking the production/main codebase."
+            },
+            {
+                q: "What is the advantage of 'Squash and Merge'?",
+                options: ["A) It keeps every commit.", "B) It combines all commits into one, making history cleaner.", "C) It deletes the PR."],
+                answer: "Combines commits for cleaner history",
+                explanation: "Squashing condenses the entire feature history into a single commit on the target branch."
+            },
+            {
+                q: "Which merge option keeps linear history without a merge commit?",
+                options: ["A) Create a merge commit.", "B) Rebase and merge.", "C) Squash and merge."],
+                answer: "Rebase and merge",
+                explanation: "Rebase applies commits one by one onto the base branch, maintaining a straight line."
+            },
+            {
+                q: "What should you do if conflicts appear during PR review?",
+                options: ["A) Ignore them.", "B) Force merge.", "C) Identify and resolve conflicts before merging."],
+                answer: "Resolve conflicts first",
+                explanation: "Git cannot merge automatically when lines conflict; manual resolution is required."
+            },
+            // Block 15
+            {
+                q: "How does GitHub top-level search differ from repo tab searches?",
+                options: ["A) It's faster.", "B) Top-level searches everything; repo searches are scoped.", "C) Repo search is global."],
+                answer: "Top-level is global; repo is scoped",
+                explanation: "The search bar behavior changes context depending on where you are in the UI."
+            },
+            {
+                q: "What does git blame do?",
+                options: ["A) Deletes bad code.", "B) Displays line-by-line attribution/commit history.", "C) Blames the admin."],
+                answer: "Displays line-by-line attribution",
+                explanation: "It shows which commit and author last modified each line of a file."
+            },
+            {
+                q: "What is a benefit of assigning a milestone to issues?",
+                options: ["A) It closes them.", "B) It tracks progress toward a shared goal/release.", "C) It encrypts them."],
+                answer: "Tracks progress toward goal",
+                explanation: "Milestones group issues and PRs to track completion percentage for a specific target."
+            },
+            {
+                q: "How do you insert a saved reply in a comment?",
+                options: ["A) Type it manually.", "B) Click the saved reply icon and select it.", "C) Use a bot."],
+                answer: "Click saved reply icon",
+                explanation: "Saved replies let you quickly insert common responses from a menu."
+            },
+            // Block 16
+            {
+                q: "How does Copilot work?",
+                options: ["A) It copies code from StackOverflow.", "B) Uses prompts/natural language to provide suggestions.", "C) It runs unit tests."],
+                answer: "Uses prompts for suggestions",
+                explanation: "Copilot uses an AI model to generate code based on context and your comments."
+            },
+            {
+                q: "How can you accept Copilot's suggestions?",
+                options: ["A) Press Enter.", "B) Press the Tab key.", "C) Click 'Accept'."],
+                answer: "Press Tab",
+                explanation: "Tab is the standard keybinding to accept the ghost text suggestion."
+            },
+            {
+                q: "What does the quality of Copilot output depend on?",
+                options: ["A) Your internet speed.", "B) How well you craft your prompt.", "C) The time of day."],
+                answer: "How well you craft your prompt",
+                explanation: "Clear, specific context and comments help the AI generate better results."
+            }
+        ];
+
+        // --- Logic ---
+        let currentIdx = 0;
+        let isPlaying = false;
+        let synth = window.speechSynthesis;
+        let utterance = null;
+        let voices = [];
+        let completed = false;
+
+        // Elements
+        const qNumEl = document.getElementById('q-num');
+        const qTotalEl = document.getElementById('q-total');
+        const displayTextEl = document.getElementById('display-text');
+        const statusTextEl = document.getElementById('status-text');
+        const playBtnEl = document.getElementById('play-pause-btn');
+        const progressEl = document.getElementById('progress');
+        const overlay = document.getElementById('start-overlay');
+
+        // Initialize Voices
+        function loadVoices() {
+            voices = synth.getVoices();
+        }
+        
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        // On Load
+        window.onload = function() {
+            updateUI();
+            // Force user interaction to avoid audio policy errors
+            overlay.style.display = 'flex';
+        };
+
+        function startQuizManual() {
+            overlay.style.display = "none";
+            // Resume if paused, or start over
+            if (synth.paused) {
+                synth.resume();
+            } else {
+                startQuizLogic();
+            }
+            isPlaying = true;
+            updatePlayButton();
+        }
+
+        function startQuizLogic() {
+            if (completed) {
+                currentIdx = 0;
+                completed = false;
+            }
+            playSequence(currentIdx);
+        }
+
+        function playSequence(index, announceTransition = false) {
+            if (index >= quizData.length) {
+                finishQuiz();
+                return;
+            }
+
+            cancelSpeech();
+            isPlaying = true;
+            updateUI();
+
+            const q = quizData[index];
+            const qNum = index + 1;
+
+            const part1 = `Question ${qNum}. ${q.q}`;
+            const part2 = `${q.options.join(". ")}`;
+            const part3 = `The correct answer is ${q.answer}. Explanation: ${q.explanation}`;
+
+            // Small delay to ensure cancel() finished in browser engine
+            setTimeout(() => {
+                if(!isPlaying) return;
+                
+                // Helper function to start reading the question proper
+                const startReading = () => {
+                     speakText(part1, "Reading Question...", () => {
+                        if(!isPlaying) return;
+                        speakText(part2, "Reading Options...", () => {
+                            if(!isPlaying) return;
+                            setTimeout(() => {
+                                if(!isPlaying) return;
+                                speakText(part3, "Explaining Answer...", () => {
+                                    if(!isPlaying) return;
+                                    setTimeout(() => {
+                                        if(isPlaying) nextQuestion(false); // Auto advance is NOT manual
+                                    }, 1000);
+                                });
+                            }, 500);
+                        });
+                    });
+                };
+
+                if (announceTransition) {
+                    // Speak transition phrase first at 1.5x speed
+                    speakText(`Switched to question number ${qNum}`, `Switched to Q${qNum}`, () => {
+                         if(!isPlaying) return;
+                         startReading();
+                    }, 1.5);
+                } else {
+                    startReading();
+                }
+
+            }, 50);
+        }
+
+        function speakText(text, statusMsg, onEndCallback, rate = 1.0) {
+            if (!isPlaying) return;
+
+            statusTextEl.innerText = statusMsg;
+            displayTextEl.innerText = text;
+
+            // Create new utterance
+            let u = new SpeechSynthesisUtterance(text);
+            u.rate = rate; // Use the provided rate (defaults to 1.0)
+            u.pitch = 1.0;
+            
+            // Try to set voice if available
+            if (voices.length > 0) {
+                const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
+                if (preferredVoice) u.voice = preferredVoice;
+            }
+
+            // Events
+            u.onend = () => {
+                if (onEndCallback) onEndCallback();
+            };
+
+            u.onerror = (e) => {
+                console.error("Speech error", e);
+                // If it was canceled intentionally, ignore. 
+                // If it was a real error (like network or policy), stop playing
+                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                     isPlaying = false;
+                     statusTextEl.innerText = "Error playing audio. Press Next.";
+                     updatePlayButton();
+                }
+            };
+
+            // Global ref to prevent GC
+            utterance = u; 
+            synth.speak(u);
+        }
+
+        function cancelSpeech() {
+            synth.cancel();
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                // Pause
+                isPlaying = false;
+                synth.cancel(); 
+                statusTextEl.innerText = "Paused";
+            } else {
+                // Resume
+                isPlaying = true;
+                playSequence(currentIdx, false); // No transition announcement on resume
+            }
+            updatePlayButton();
+        }
+
+        function nextQuestion(isManual = false) {
+            if (currentIdx < quizData.length) {
+                 if (currentIdx + 1 >= quizData.length) {
+                     finishQuiz();
+                     return;
+                 }
+                currentIdx++;
+                playSequence(currentIdx, isManual);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                playSequence(currentIdx, true); // Always manual/transition
+            }
+        }
+
+        function finishQuiz() {
+            completed = true;
+            isPlaying = false;
+            updateUI();
+            displayTextEl.innerText = "Congratulations! You have completed the quiz.";
+            statusTextEl.innerText = "Finished";
+            speakText("Congratulations! You have completed the quiz.", "Finished", null);
+            updatePlayButton();
+        }
+
+        function updateUI() {
+            qNumEl.innerText = (currentIdx + 1 > quizData.length) ? quizData.length : currentIdx + 1;
+            qTotalEl.innerText = quizData.length;
+            
+            const percent = ((currentIdx) / quizData.length) * 100;
+            progressEl.style.width = `${percent}%`;
+
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            playBtnEl.innerText = isPlaying ? "Pause" : "Play";
+            playBtnEl.classList.toggle('primary', !isPlaying);
+            if(isPlaying) {
+                playBtnEl.style.backgroundColor = "#d73a49";
+                playBtnEl.style.borderColor = "#d73a49";
+            } else {
+                playBtnEl.style.backgroundColor = "";
+                playBtnEl.style.borderColor = "";
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GitHub & Version Control Audio Quiz</title>
+    <style>
+        :root {
+            --primary: #2da44e; /* GitHub Green */
+            --primary-hover: #2c974b;
+            --dark: #0d1117;    /* GitHub Dark Bg */
+            --card: #161b22;    /* GitHub Card Bg */
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --btn-bg: #21262d;
+            --btn-border: rgba(240, 246, 252, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+
+        .container {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px; /* Softer corners */
+            padding: 30px 24px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Small box showing which question is playing */
+        .status-box {
+            display: inline-block;
+            background-color: rgba(56, 139, 253, 0.1);
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-area {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 120px; /* Ensure space for text */
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .current-action {
+            font-size: 1em;
+            color: #8b949e;
+            font-style: italic;
+            margin-bottom: 30px;
+            height: 24px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: auto; /* Push to bottom if container grows */
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text);
+            padding: 18px 12px; /* Large touch target */
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1; /* Distribute space equally */
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2); /* Button depth */
+            touch-action: manipulation; /* Optimizes touch delay */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        button.primary {
+            background-color: var(--primary);
+            color: white;
+            border-color: rgba(240, 246, 252, 0.1);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            flex: 1.2; /* Make play button slightly wider */
+            font-size: 1.2em; /* Make text slightly larger */
+        }
+
+        button.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Overlay for autoplay policy */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex; /* Changed to flex by default to enforce click */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #start-overlay h2 {
+            margin-bottom: 30px;
+            color: white;
+            font-size: 1.8em;
+        }
+
+        #start-overlay button {
+            max-width: 300px;
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-top: 32px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 8px rgba(45, 164, 78, 0.4);
+        }
+
+        /* Responsive Tweaks */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+            .container {
+                padding: 24px 16px;
+                min-height: 60vh; /* Ensure height on mobile */
+            }
+            .question-text {
+                font-size: 1.1em;
+            }
+            .controls {
+                gap: 8px;
+            }
+            button {
+                padding: 16px 8px;
+                font-size: 1em;
+            }
+            button.primary {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay for Browser Autoplay Policies -->
+    <div id="start-overlay">
+        <h2>Ready to Quiz?</h2>
+        <button class="primary" onclick="startQuizManual()">Tap to Start</button>
+    </div>
+
+    <div class="container">
+        <!-- The Small Box -->
+        <div class="status-box">
+            Question <span id="q-num">1</span> / 40
+        </div>
+
+        <!-- Visual Display of what's happening -->
+        <div class="question-area">
+            <div class="question-text" id="display-text">
+                Waiting to start...
+            </div>
+            <div class="current-action" id="status-text">
+                Press Start to begin
+            </div>
+        </div>
+
+        <!-- Three Buttons -->
+        <div class="controls">
+            <button onclick="prevQuestion()">Previous</button>
+            <!-- Passing true to nextQuestion indicates manual click -->
+            <button id="play-pause-btn" class="primary" onclick="togglePlay()">Pause</button>
+            <button onclick="nextQuestion(true)">Next</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const quizData = [
+            { q: "What does the term version control primarily refer to?", options: ["A) A system for controlling software licences", "B) A system that tracks changes to files and enables collaboration over time", "C) A system that automates software deployment", "D) A system that encrypts source code repositories"], answer: "B", explanation: "Version control systems record changes to files over time, allowing multiple people to collaborate, track history, and revert to earlier versions if needed." },
+            { q: "Which file provides an overview of a repository’s purpose?", options: ["A) LICENSE.txt", "B) CODEOWNERS", "C) README.md", "D) CONTRIBUTING.md"], answer: "C", explanation: "README.md explains what the project is about, how to use it, and often how to contribute." },
+            { q: "What is the role of the CONTRIBUTING.md file?", options: ["A) It holds compiled binaries", "B) Defines guidelines for contributors and contribution process", "C) Stores commit history", "D) Replaces README"], answer: "B", explanation: "CONTRIBUTING.md tells contributors how to report bugs, submit PRs, follow coding standards, and follow project rules." },
+            { q: "Which visibility options exist for GitHub repos in an organization context?", options: ["A) Only public or private", "B) Public, private, internal", "C) Public, internal, archived", "D) Private only"], answer: "B", explanation: "Organizations support internal repositories, visible only to organization members, in addition to public and private." },
+            { q: "What is a protected branch?", options: ["A) A branch with no commits allowed", "B) A branch with rules like required PR reviews before merge", "C) A hidden branch", "D) A branch only owner accesses"], answer: "B", explanation: "Protected branches enforce rules such as required reviews, status checks, and restricted pushes to protect critical branches like main." },
+            { q: "Which is NOT a GitHub permission level?", options: ["A) Read", "B) Write", "C) Maintain", "D) DeleteOnly"], answer: "D", explanation: "DeleteOnly is not a valid GitHub permission level." },
+            { q: "What does triage permission allow?", options: ["A) Merge PRs with admin rights", "B) Manage issues and PRs without writing code", "C) Delete the repository", "D) Edit billing settings"], answer: "B", explanation: "Triage permission is designed for project managers or maintainers who organize issues and PRs without code access." },
+            { q: "Which GitHub feature tracks tasks and PRs in Kanban format?", options: ["A) GitHub Actions", "B) GitHub Projects", "C) GitHub Packages", "D) GitHub Secrets"], answer: "B", explanation: "GitHub Projects provides boards, fields, and automation for tracking work visually." },
+            { q: "Benefit of a template repository?", options: ["A) Deletes branches automatically", "B) Creates a repository with the same structure as the template", "C) Prohibits collaboration", "D) Converts repo into a wiki"], answer: "B", explanation: "Template repositories let you quickly create new repositories with predefined files and structure." },
+            { q: "Base and compare in a pull request mean:", options: ["A) Base = branch merging into; Compare = branch merging from", "B) Base = local, compare = remote", "C) Base = fork, compare = desktop", "D) Base = tag, compare = branch"], answer: "A", explanation: "The base branch receives the changes; the compare branch contains the changes being proposed." },
+            { q: "Benefit of GitHub Issues?", options: ["A) Compile code", "B) Track bugs, tasks, and feature requests", "C) Run tests", "D) Hide metrics"], answer: "B", explanation: "Issues are central to planning, tracking work, and collaboration." },
+            { q: "What best describes a distributed version control system (DVCS)?", options: ["A) Only one central repository exists", "B) Each developer has a full copy including complete history", "C) History stored on a local network only", "D) Developers must always be online"], answer: "B", explanation: "In DVCS (like Git), every clone contains the entire project history." },
+            { q: "GitHub formatting language?", options: ["A) HTML", "B) Plain text", "C) GitHub Flavoured Markdown (GFM)", "D) XML"], answer: "C", explanation: "GitHub uses GFM, which extends standard Markdown with extra features." },
+            { q: "What can be done on GitHub mobile/desktop?", options: ["A) Encrypt repositories", "B) Edit, review, and triage work", "C) Force-push without admin", "D) Change billing plans"], answer: "B", explanation: "GitHub apps allow code review, issue management, and collaboration tasks." },
+            { q: "Code scanning (CodeQL) detects:", options: ["A) Network traffic", "B) Security vulnerabilities", "C) License issues", "D) Archived branches"], answer: "B", explanation: "CodeQL analyzes code to detect security flaws and coding vulnerabilities." },
+            { q: "What is InnerSource?", options: ["A) A branch in trunk", "B) Using open-source practices inside an organization", "C) A private repo with no collaboration", "D) A GitHub mobile feature"], answer: "B", explanation: "InnerSource applies open-source collaboration principles within a company." },
+            { q: "Recommended authentication method?", options: ["A) Password only", "B) 2FA and/or SSO", "C) Username only", "D) IP restriction"], answer: "B", explanation: "Two-factor authentication and SSO greatly improve account security." },
+            { q: "Blame feature shows:", options: ["A) Delete commit", "B) Who modified each line and when", "C) Create branch", "D) Merge branches"], answer: "B", explanation: "git blame attributes each line of code to its last modifying commit and author." },
+            { q: "Forking a repository means:", options: ["A) Read-only copy", "B) Independent copy you can modify and PR back to upstream", "C) Deletes original", "D) Auto-merges branches"], answer: "B", explanation: "Forks let you work independently and contribute via pull requests." },
+            { q: "GitHub Pages allows:", options: ["A) Hosting static websites", "B) Running backend APIs", "C) Storing media files only", "D) Enforcing reviews"], answer: "A", explanation: "GitHub Pages hosts static content like HTML, CSS, and JS." },
+            { q: "File specifying required reviewers?", options: ["A) .gitignore", "B) CODEOWNERS", "C) SECURITY.md", "D) LICENSE"], answer: "B", explanation: "CODEOWNERS defines who must review changes to specific files." },
+            { q: "SECURITY.md file purpose:", options: ["A) Store executables", "B) Instructions for reporting vulnerabilities", "C) Store encryption keys", "D) List deprecated branches"], answer: "B", explanation: "SECURITY.md explains how to responsibly disclose security issues." },
+            { q: "Which command initializes a new Git repository locally?", options: ["A) git clone", "B) git commit", "C) git init", "D) git push"], answer: "C", explanation: "git init creates a new local Git repository." },
+            { q: "Draft pull request:", options: ["A) Already merged", "B) Not ready for review until converted", "C) Has no comments", "D) External contributors only"], answer: "B", explanation: "Draft PRs signal work in progress." },
+            { q: "GitHub Actions is:", options: ["A) Label system", "B) CI/CD and automation engine", "C) Command-line replacement", "D) Permission setting"], answer: "B", explanation: "GitHub Actions automates builds, tests, deployments, and workflows." },
+            { q: "Milestone is used for:", options: ["A) Licensing", "B) Tracking goals with grouped issues and PRs", "C) Auto-merging branches", "D) Encryption"], answer: "B", explanation: "Milestones track progress toward releases or goals." },
+            { q: "Issues vs Discussions:", options: ["A) Issues for code only", "B) Issues are action-oriented; discussions are open-ended", "C) Discussions require admin", "D) No difference"], answer: "B", explanation: "Issues track work; discussions encourage conversation." },
+            { q: "Permission allowing push but not delete:", options: ["A) Read", "B) Write", "C) Admin", "D) Owner"], answer: "B", explanation: "Write permission allows pushing changes but not destructive admin actions." },
+            { q: "Responsibility of maintainer:", options: ["A) Review issues only", "B) Full admin including deletion", "C) Manage repo settings and releases without destructive control", "D) View only"], answer: "C", explanation: "Maintainers manage workflows without full admin power." },
+            { q: "Best practice for security:", options: ["A) Put credentials in README", "B) Disable branch protection", "C) Enable 2FA, branch protections, and scanning alerts", "D) Use main without workflows"], answer: "C", explanation: "Layered security practices protect repositories and contributors." },
+            { q: "Template repository usage:", options: ["A) Unchangeable branch", "B) Starter structure for new repositories", "C) Maintainer-only commits", "D) Archived repository"], answer: "B", explanation: "Templates standardize project setup." },
+            { q: "Network graph shows:", options: ["A) CPU usage", "B) Fork and branch divergence over time", "C) Commits per line", "D) License status"], answer: "B", explanation: "Network graphs visualize repository history and branching." },
+            { q: "Required status checks mean:", options: ["A) Delete branch first", "B) All checks must pass and required reviews approved", "C) Repo archived", "D) PR marked duplicate"], answer: "B", explanation: "Required checks prevent merging broken or unreviewed code." },
+            { q: "What is a GitHub repository?", options: ["A) Local folder only", "B) Storage for code, history, issues, PRs, and artifacts", "C) Computer backup", "D) Branch type"], answer: "B", explanation: "A repository is the central hub for a project on GitHub." },
+            { q: "Main advantage of contributing to open source?", options: ["A) Automatic payment", "B) Build skills, reputation, collaborate, learn", "C) Take ownership", "D) Write no code"], answer: "B", explanation: "Open source builds experience, visibility, and community impact." },
+            { q: "Purpose of a branch?", options: ["A) Maintain main only", "B) Isolate changes for parallel work", "C) Delete commits", "D) Encrypt code"], answer: "B", explanation: "Branches allow safe, parallel development." },
+            { q: "What is a commit?", options: ["A) Scheduled merge", "B) Publishing code", "C) Snapshot of changes with a message", "D) Branch deletion"], answer: "C", explanation: "Commits record project history incrementally." },
+            { q: "What is a pull request (PR)?", options: ["A) Local update request", "B) Proposal to merge changes with review", "C) Pull code locally", "D) Issue notification"], answer: "B", explanation: "PRs enable review, discussion, and controlled merging." },
+            { q: "Which statement is true about GitHub flow?", options: ["A) Commit directly to main", "B) Create branch → commit → PR → merge", "C) Delete main", "D) Merge before commit"], answer: "B", explanation: "This workflow ensures safety and collaboration." },
+            { q: "One benefit of GitHub Copilot is:", options: ["A) Acts as a database", "B) Uses AI to suggest code in real time", "C) Replaces Git", "D) Hardware device"], answer: "B", explanation: "GitHub Copilot boosts productivity by providing AI-powered coding suggestions." }
+        ];
+
+        // --- Logic ---
+        let currentIdx = 0;
+        let isPlaying = false;
+        let synth = window.speechSynthesis;
+        let utterance = null;
+        let voices = [];
+        let completed = false;
+
+        // Elements
+        const qNumEl = document.getElementById('q-num');
+        const displayTextEl = document.getElementById('display-text');
+        const statusTextEl = document.getElementById('status-text');
+        const playBtnEl = document.getElementById('play-pause-btn');
+        const progressEl = document.getElementById('progress');
+        const overlay = document.getElementById('start-overlay');
+
+        // Initialize Voices
+        function loadVoices() {
+            voices = synth.getVoices();
+        }
+        
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        // On Load
+        window.onload = function() {
+            updateUI();
+            // Force user interaction to avoid audio policy errors
+            overlay.style.display = 'flex';
+        };
+
+        function startQuizManual() {
+            overlay.style.display = "none";
+            // Resume if paused, or start over
+            if (synth.paused) {
+                synth.resume();
+            } else {
+                startQuizLogic();
+            }
+            isPlaying = true;
+            updatePlayButton();
+        }
+
+        function startQuizLogic() {
+            if (completed) {
+                currentIdx = 0;
+                completed = false;
+            }
+            playSequence(currentIdx);
+        }
+
+        function playSequence(index, announceTransition = false) {
+            if (index >= quizData.length) {
+                finishQuiz();
+                return;
+            }
+
+            cancelSpeech();
+            isPlaying = true;
+            updateUI();
+
+            const q = quizData[index];
+            const qNum = index + 1;
+
+            const part1 = `Question ${qNum}. ${q.q}`;
+            const part2 = `${q.options.join(". ")}`;
+            const part3 = `The correct answer is ${q.answer}. Explanation: ${q.explanation}`;
+
+            // Small delay to ensure cancel() finished in browser engine
+            setTimeout(() => {
+                if(!isPlaying) return;
+                
+                // Helper function to start reading the question proper
+                const startReading = () => {
+                     speakText(part1, "Reading Question...", () => {
+                        if(!isPlaying) return;
+                        speakText(part2, "Reading Options...", () => {
+                            if(!isPlaying) return;
+                            setTimeout(() => {
+                                if(!isPlaying) return;
+                                speakText(part3, "Explaining Answer...", () => {
+                                    if(!isPlaying) return;
+                                    setTimeout(() => {
+                                        if(isPlaying) nextQuestion(false); // Auto advance is NOT manual
+                                    }, 1000);
+                                });
+                            }, 500);
+                        });
+                    });
+                };
+
+                if (announceTransition) {
+                    // Speak transition phrase first at 1.5x speed
+                    speakText(`Switched to question number ${qNum}`, `Switched to Q${qNum}`, () => {
+                         if(!isPlaying) return;
+                         startReading();
+                    }, 1.5);
+                } else {
+                    startReading();
+                }
+
+            }, 50);
+        }
+
+        function speakText(text, statusMsg, onEndCallback, rate = 1.0) {
+            if (!isPlaying) return;
+
+            statusTextEl.innerText = statusMsg;
+            displayTextEl.innerText = text;
+
+            // Create new utterance
+            let u = new SpeechSynthesisUtterance(text);
+            u.rate = rate; // Use the provided rate (defaults to 1.0)
+            u.pitch = 1.0;
+            
+            // Try to set voice if available
+            if (voices.length > 0) {
+                const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
+                if (preferredVoice) u.voice = preferredVoice;
+            }
+
+            // Events
+            u.onend = () => {
+                if (onEndCallback) onEndCallback();
+            };
+
+            u.onerror = (e) => {
+                console.error("Speech error", e);
+                // If it was canceled intentionally, ignore. 
+                // If it was a real error (like network or policy), stop playing
+                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                     isPlaying = false;
+                     statusTextEl.innerText = "Error playing audio. Press Next.";
+                     updatePlayButton();
+                }
+            };
+
+            // Global ref to prevent GC
+            utterance = u; 
+            synth.speak(u);
+        }
+
+        function cancelSpeech() {
+            synth.cancel();
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                // Pause
+                isPlaying = false;
+                synth.cancel(); 
+                statusTextEl.innerText = "Paused";
+            } else {
+                // Resume
+                isPlaying = true;
+                playSequence(currentIdx, false); // No transition announcement on resume
+            }
+            updatePlayButton();
+        }
+
+        function nextQuestion(isManual = false) {
+            if (currentIdx < quizData.length) {
+                 if (currentIdx + 1 >= quizData.length) {
+                     finishQuiz();
+                     return;
+                 }
+                currentIdx++;
+                playSequence(currentIdx, isManual);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                playSequence(currentIdx, true); // Always manual/transition
+            }
+        }
+
+        function finishQuiz() {
+            completed = true;
+            isPlaying = false;
+            updateUI();
+            displayTextEl.innerText = "Congratulations! You have completed the quiz.";
+            statusTextEl.innerText = "Finished";
+            speakText("Congratulations! You have completed the quiz.", "Finished", null);
+            updatePlayButton();
+        }
+
+        function updateUI() {
+            qNumEl.innerText = (currentIdx + 1 > quizData.length) ? quizData.length : currentIdx + 1;
+            
+            const percent = ((currentIdx) / quizData.length) * 100;
+            progressEl.style.width = `${percent}%`;
+
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            playBtnEl.innerText = isPlaying ? "Pause" : "Play";
+            playBtnEl.classList.toggle('primary', !isPlaying);
+            if(isPlaying) {
+                playBtnEl.style.backgroundColor = "#d73a49";
+                playBtnEl.style.borderColor = "#d73a49";
+            } else {
+                playBtnEl.style.backgroundColor = "";
+                playBtnEl.style.borderColor = "";
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GitHub Exam Preparation Hub</title>
+    <style>
+        /* Reset and Base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; /* Fill entire screen */
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+        }
+
+        /* Main container fills the screen. 
+           We use flexbox to split space evenly among the 3 buttons.
+        */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Huge Button Styles 
+           - Flex: 1 makes them grow to fill equal space
+           - High contrast borders
+        */
+        .access-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            text-align: center;
+            padding: 20px;
+            border-bottom: 4px solid #000;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+            outline-offset: -8px; /* Focus ring inside */
+        }
+
+        .access-btn:last-child {
+            border-bottom: none;
+        }
+
+        /* Focus States for Keyboard Navigation */
+        .access-btn:focus {
+            outline: 8px solid #FFFFFF;
+            z-index: 10;
+            text-decoration: underline;
+        }
+
+        /* Typography */
+        .btn-title {
+            font-size: 2.5rem; /* Very large text */
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-desc {
+            font-size: 1.2rem;
+            font-weight: 500;
+            max-width: 600px;
+        }
+
+        /* Color Schemes for High Contrast 
+           Optimized for distinctness
+        */
+
+        /* Button 1: Yellow on Black (Standard High Contrast) */
+        .btn-1 {
+            background-color: #FFD700; /* Gold/Yellow */
+            color: #000000;
+        }
+        .btn-1:hover, .btn-1:focus {
+            background-color: #FFED4A;
+        }
+
+        /* Button 2: White on Dark Blue (Calm but clear) */
+        .btn-2 {
+            background-color: #003366; /* Dark Blue */
+            color: #FFFFFF;
+        }
+        .btn-2:hover, .btn-2:focus {
+            background-color: #004488;
+        }
+
+        /* Button 3: Black on White (Classic document style) */
+        .btn-3 {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        .btn-3:hover, .btn-3:focus {
+            background-color: #F0F0F0;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .btn-title {
+                font-size: 2rem;
+            }
+            .btn-desc {
+                font-size: 1rem;
+                display: block; /* Ensure it shows */
+            }
+        }
+        
+        /* Screen Reader Only Class */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden H1 for Screen Reader Context -->
+    <h1 class="sr-only">GitHub Exam Preparation Hub. Select a module below.</h1>
+
+    <main role="main">
+        
+        <!-- Button 1 -->
+        <a href="demo.html" class="access-btn btn-1" aria-label="Demo Exam. A quick 10 question test.">
+            <span class="btn-title" aria-hidden="true">Demo Exam</span>
+            <span class="btn-desc" aria-hidden="true">Quick 10-Question Test</span>
+        </a>
+
+        <!-- Button 2 -->
+        <a href="module.html" class="access-btn btn-2" aria-label="Foundation Modules. 85 questions broken into sections.">
+            <span class="btn-title" aria-hidden="true">Foundation Modules</span>
+            <span class="btn-desc" aria-hidden="true">Full 85-Question Set</span>
+        </a>
+
+        <!-- Button 3 -->
+        <a href="question-bank.html" class="access-btn btn-3" aria-label="College Question Bank. 40 academic style questions.">
+            <span class="btn-title" aria-hidden="true">Question Bank</span>
+            <span class="btn-desc" aria-hidden="true">40 Academic Questions</span>
+        </a>
+
+    </main>
+
+</body>
+</html>
